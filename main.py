@@ -1,17 +1,15 @@
 import streamlit as st
 from PIL import Image
-import easyocr
 import io
-
-# Initialiser le lecteur pour l'anglais
-reader = easyocr.Reader(['en'])
+from langchain.document_loaders.image import UnstructuredImageLoader
 
 def extract_text_from_image(image):
-    # Convertir l'image en texte
-    result = reader.readtext(image, detail=0)
-    return "\n".join(result)
+    loader = UnstructuredImageLoader(image)
+    data = loader.load()
+    raw_text = data[0].page_content
+    return raw_text
 
-st.title('Application OCR avec Streamlit et EasyOCR')
+st.title('Application OCR avec Streamlit et LangChain')
 
 uploaded_file = st.file_uploader("Choisissez une image...", type=["jpg", "jpeg", "png"])
 
