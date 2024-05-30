@@ -3,9 +3,12 @@ from PIL import Image
 import io
 from google.cloud import vision
 from google.oauth2 import service_account
+import os
+import json
 
-# Remplacez 'path_to_your_service_account.json' par le chemin de votre fichier de clé JSON
-credentials = service_account.Credentials.from_service_account_file('path_to_your_service_account.json')
+# Charger les credentials depuis la variable d'environnement
+credentials_info = json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
+credentials = service_account.Credentials.from_service_account_info(credentials_info)
 client = vision.ImageAnnotatorClient(credentials=credentials)
 
 def extract_text_from_image(image):
@@ -22,7 +25,7 @@ def extract_text_from_image(image):
     else:
         return "Aucun texte détecté"
 
-st.title('Application conversion image-text')
+st.title('Application OCR avec Streamlit')
 
 uploaded_file = st.file_uploader("Choisissez une image...", type=["jpg", "jpeg", "png"])
 
