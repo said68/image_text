@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 import io
-from langchain.document_loaders.image import UnstructuredImageLoader
+from langchain_community.document_loaders.image import UnstructuredImageLoader
 
 def extract_text_from_image(image):
     loader = UnstructuredImageLoader(image)
