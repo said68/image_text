@@ -1,3 +1,4 @@
-streamlit
+flask
+pytesseract
+gunicorn
 pillow
-google-cloud-vision
