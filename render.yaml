@@ -4,7 +4,6 @@ services:
     name: ocr-app
     env: python
     buildCommand: |
-      apt-get update && \
-      apt-get install -y tesseract-ocr tesseract-ocr-fra && \
+      ./setup.sh
       pip install -r requirements.txt
-    startCommand: streamlit run main.py --server.port $PORT
+    startCommand: streamlit run main.py --server.port 8080
