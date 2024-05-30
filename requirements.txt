@@ -1,4 +1,3 @@
-flask
-pytesseract
-gunicorn
+streamlit
 pillow
+easyocr
