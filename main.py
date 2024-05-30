@@ -1,44 +1,30 @@
-import streamlit as st
+from flask import Flask, request, jsonify
 from PIL import Image
-import io
-from google.cloud import vision
-from google.oauth2 import service_account
+import pytesseract
 import os
-import json
 
-# Charger les credentials depuis la variable d'environnement
-credentials_info = json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-credentials = service_account.Credentials.from_service_account_info(credentials_info)
-client = vision.ImageAnnotatorClient(credentials=credentials)
+app = Flask(__name__)
 
-def extract_text_from_image(image):
-    content = io.BytesIO()
-    image.save(content, format='PNG')
-    image_content = content.getvalue()
-    
-    image = vision.Image(content=image_content)
-    response = client.text_detection(image=image)
-    texts = response.text_annotations
-    
-    if texts:
-        return texts[0].description
-    else:
-        return "Aucun texte détecté"
+UPLOAD_FOLDER = 'uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
-st.title('Application OCR avec Streamlit')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-uploaded_file = st.file_uploader("Choisissez une image...", type=["jpg", "jpeg", "png"])
+@app.route('/ocr', methods=['POST'])
+def ocr():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if file:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(file_path)
+        text = pytesseract.image_to_string(Image.open(file_path))
+        os.remove(file_path)  # Optionally delete the file after processing
+        return jsonify({"text": text})
+    return jsonify({"error": "File upload failed"}), 400
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption='Image téléchargée', use_column_width=True)
-    st.write("")
-
-    if st.button('Extraire'):
-        with st.spinner("Conversion en cours..."):
-            text = extract_text_from_image(image)
-        st.write("Texte extrait :")
-        st.write(text)
-
-    if st.button('Initialiser'):
-        st.experimental_rerun()
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
