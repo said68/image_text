@@ -4,3 +4,4 @@ langchain
 langchain-community
 unstructured
 pdfminer.six
+pillow_heif
