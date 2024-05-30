@@ -3,3 +3,4 @@ pillow
 langchain
 langchain-community
 unstructured
+pdfminer.six
