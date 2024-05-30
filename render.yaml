@@ -1,9 +1,7 @@
 version: 1
 services:
   - type: web
-    name: ocr-app
+    name: image_text
     env: python
-    buildCommand: |
-      ./setup.sh
-      pip install -r requirements.txt
-    startCommand: streamlit run main.py --server.port 8080
+    buildCommand: pip install -r requirements.txt
+    startCommand: ./start.sh
