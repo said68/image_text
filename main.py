@@ -1,30 +1,30 @@
-from flask import Flask, request, jsonify
+import streamlit as st
 from PIL import Image
-import pytesseract
-import os
+import easyocr
+import io
 
-app = Flask(__name__)
+# Initialiser le lecteur pour l'anglais
+reader = easyocr.Reader(['en'])
 
-UPLOAD_FOLDER = 'uploads'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+def extract_text_from_image(image):
+    # Convertir l'image en texte
+    result = reader.readtext(image, detail=0)
+    return "\n".join(result)
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+st.title('Application OCR avec Streamlit et EasyOCR')
 
-@app.route('/ocr', methods=['POST'])
-def ocr():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-    if file:
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        file.save(file_path)
-        text = pytesseract.image_to_string(Image.open(file_path))
-        os.remove(file_path)  # Optionally delete the file after processing
-        return jsonify({"text": text})
-    return jsonify({"error": "File upload failed"}), 400
+uploaded_file = st.file_uploader("Choisissez une image...", type=["jpg", "jpeg", "png"])
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption='Image téléchargée', use_column_width=True)
+    st.write("")
+
+    if st.button('Extraire'):
+        with st.spinner("Conversion en cours..."):
+            text = extract_text_from_image(image)
+        st.write("Texte extrait :")
+        st.write(text)
+
+    if st.button('Initialiser'):
+        st.experimental_rerun()
